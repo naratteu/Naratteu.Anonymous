@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Naratteu.Anonymous\Naratteu.Anonymous.csproj" />
+  <Project Path="Example\Example.csproj" />
+</Solution>

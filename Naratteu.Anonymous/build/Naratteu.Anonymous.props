@@ -1,0 +1,6 @@
+<Project>
+  <ItemGroup>
+    <CompilerVisibleProperty Include="AnonymousEntryName" />
+    <CompilerVisibleProperty Include="AnonymousHolderName" />
+  </ItemGroup>
+</Project>
