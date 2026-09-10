@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
@@ -18,9 +19,10 @@ public class AnonymousGenerator : IIncrementalGenerator
         context.RegisterPostInitializationOutput(ctx =>
             ctx.AddSource("Naratteu.Anonymous.Runtime.g.cs", SourceText.From(RuntimeSource.Text, Encoding.UTF8)));
 
-        var names = context.AnalyzerConfigOptionsProvider.Select((p, _) => new Names(
-            Option(p, "AnonymousEntryName", "New"),
-            Option(p, "AnonymousHolderName", "Anon")));
+        var names = context.AnalyzerConfigOptionsProvider.Combine(context.ParseOptionsProvider).Select((t, _) => new Opts(
+            Option(t.Left, "AnonymousEntryName", "New"),
+            Option(t.Left, "AnonymousHolderName", "Anon"),
+            t.Right is CSharpParseOptions cs && cs.LanguageVersion.MapSpecifiedToEffectiveVersion() >= (LanguageVersion)1400));
 
         var candidates = context.SyntaxProvider
             .CreateSyntaxProvider(IsCandidate, Transform)

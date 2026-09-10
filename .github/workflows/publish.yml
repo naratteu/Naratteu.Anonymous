@@ -1,0 +1,52 @@
+# nuget.org Trusted Publishing.
+# 긴수명 API 키 없이, GitHub 이 발급한 OIDC 토큰을 nuget.org 가 검증해서
+# 1시간짜리 임시 키를 내주는 방식이다.
+#
+# 쓰기 전에 nuget.org 에서 한 번 등록해둬야 한다.
+#   프로필 → Trusted Publishing → 정책 추가
+#     Repository Owner : naratteu
+#     Repository       : Naratteu.Anonymous
+#     Workflow File    : publish.yml   (경로 없이 파일명만)
+#   그리고 저장소 secrets 에 NUGET_USER = nuget.org 사용자명(이메일 아님)
+name: publish
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '올릴 버전 (비우면 csproj 의 Version)'
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # OIDC 토큰 발급
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: pack
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [ -z "$VERSION" ] && [ "$GITHUB_REF_TYPE" = tag ]; then VERSION="${GITHUB_REF_NAME#v}"; fi
+          dotnet pack Naratteu.Anonymous/Naratteu.Anonymous.csproj -c Release -o artifacts ${VERSION:+-p:Version=$VERSION}
+
+      # 임시 키는 1시간짜리라 push 직전에 받는다
+      - name: nuget login (OIDC → 임시 키)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: push
+        run: dotnet nuget push artifacts/*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json

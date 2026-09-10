@@ -1,5 +1,7 @@
 # Naratteu.Anonymous
 
+[![NuGet](https://img.shields.io/nuget/v/Naratteu.Anonymous)](https://www.nuget.org/packages/Naratteu.Anonymous)
+
 인터페이스를 자바 익명클래스처럼 **그 자리에서** 구현하게 해주는 소스제너레이터.
 
 C# 에는 자바의 익명클래스가 없다. ([왜 없는지](https://chatgpt.com/s/t_6aa204ce1c288191b982085d6e79819b))
@@ -101,6 +103,18 @@ using 블록 안
 hi world
 ```
 
+## 프로젝트에서 쓰려면
+
+```bash
+dotnet add package Naratteu.Anonymous
+```
+
+빌드할 때만 필요한 소스제너레이터라 결과물에 런타임 의존성이 남지 않는다.
+
+확장 형태(`IGreeter.New(..)`)는 C# 14 를 쓰므로 .NET 10 SDK 가 필요하다.
+그 아래 버전에서는 확장 형태를 아예 만들지 않고 `ANON005` 로 알려주며, 제네릭 형태
+(`Anon.New<IGreeter>(..)`)는 그대로 돌아간다. (.NET 9 SDK 에서 확인)
+
 ## 어떻게 도는가
 
 `IGreeter.New(new() { .. })` 같은 호출을 생성기가 **호출지점에서** 발견하면, 그 인터페이스를
@@ -140,6 +154,7 @@ IGreeter b = Anon.New<IGreeter>(new() { .. });  // 제네릭 형태 — C# 11 �
 
 - **확장 형태**는 C# 14 의 확장 정적 멤버(`extension(IGreeter) { public static .. }`)를 쓴다.
   인터페이스 이름으로 바로 호출하니 제일 짧고, 상속관계가 있어도 모호해지지 않는다.
+  컴파일의 언어버전이 C# 14 에 못 미치면 이쪽은 만들지 않는다.
 - **제네릭 형태**는 인터페이스마다 오버로드를 깔아두고 `where A : IGreeter` 제약으로 후보를 걸러낸다.
   파생 인터페이스끼리 겹치는 문제는 생성 클래스를 인터페이스 상속구조에 맞춰
   (`__Anon_IGreeterEx : __Anon_IGreeter`) 상속시켜 해결한다.
@@ -183,6 +198,14 @@ IGreeter b = Anon.New<IGreeter>(new() { .. });  // 제네릭 형태 — C# 11 �
 | `ANON002` | 제네릭 메서드는 대리자로 못 옮긴다. 호출하면 `NotSupportedException` |
 | `ANON003` | 제네릭 형태 호출이 상속관계 때문에 모호하다. 확장 형태로 부르면 된다 |
 | `ANON004` | `static abstract` · 연산자 · 비공개 멤버가 있어 익명구현 자체가 불가능 |
+| `ANON005` | 확장 형태로 불렀는데 언어버전이 C# 14 에 못 미친다 |
+
+## 배포
+
+nuget.org [Trusted Publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing) 을 쓴다.
+긴수명 API 키를 두지 않고, GitHub 이 발급한 OIDC 토큰을 nuget.org 가 검증해서 1시간짜리
+임시 키를 내주는 방식이다. `v0.0.1` 처럼 태그를 밀면
+[`.github/workflows/publish.yml`](.github/workflows/publish.yml) 이 돈다.
 
 ## 라이센스
 

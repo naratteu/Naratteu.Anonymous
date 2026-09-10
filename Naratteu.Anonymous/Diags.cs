@@ -26,11 +26,17 @@ static class Diags
         "'{0}' 은(는) 인스턴스 대리자로 옮길 수 없는 멤버(static abstract / 연산자 / 비공개 멤버)를 가지고 있어 익명구현을 만들 수 없습니다",
         Category, DiagnosticSeverity.Error, true);
 
+    public static readonly DiagnosticDescriptor ExtensionNeedsCSharp14 = new("ANON005",
+        "확장 형태는 C# 14 부터",
+        "'{0}' 을(를) 확장 형태로 부르려면 C# 14 가 필요합니다. LangVersion 을 올리거나 {1}.{2}<{0}>(..) 로 부르세요.",
+        Category, DiagnosticSeverity.Warning, true);
+
     public static readonly Dictionary<string, DiagnosticDescriptor> ById = new()
     {
         [NotAnInterface.Id] = NotAnInterface,
         [UnsupportedMember.Id] = UnsupportedMember,
         [AmbiguousGenericForm.Id] = AmbiguousGenericForm,
         [CannotImplement.Id] = CannotImplement,
+        [ExtensionNeedsCSharp14.Id] = ExtensionNeedsCSharp14,
     };
 }
