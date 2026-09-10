@@ -2,22 +2,104 @@
 
 인터페이스를 자바 익명클래스처럼 **그 자리에서** 구현하게 해주는 소스제너레이터.
 
-```csharp
+C# 에는 자바의 익명클래스가 없다. ([왜 없는지](https://chatgpt.com/s/t_6aa204ce1c288191b982085d6e79819b))
+대신 `new() { .. }` 의 대상타입추론과 소스제너레이터를 엮으면 거의 같은 자리에 같은 모양으로 쓸 수 있다.
+
+## 바로 해보기
+
+프로젝트 만들 것 없이 붙여넣고 돌리면 된다. (.NET 10 SDK)
+
+### 메서드
+
+```bash
+dotnet run - <<'EOF'
+#:package Naratteu.Anonymous@0.0.1
+
 IGreeter greeter = IGreeter.New(new()
 {
     Greet = name => $"안녕, {name}!",
     Shout = Console.WriteLine,
 });
 
+Console.WriteLine(greeter.Greet("성원"));
+greeter.Shout("확장 형태 호출");
+
 interface IGreeter
 {
     string Greet(string name);
     void Shout(string message);
 }
+EOF
 ```
 
-C# 에는 자바의 익명클래스가 없다. ([왜 없는지](https://chatgpt.com/s/t_6aa204ce1c288191b982085d6e79819b))
-대신 `new() { .. }` 의 대상타입추론과 소스제너레이터를 엮으면 거의 같은 자리에 같은 모양으로 쓸 수 있다.
+```
+안녕, 성원!
+확장 형태 호출
+```
+
+### 프로퍼티 — 값을 그냥 주거나, 접근자를 직접 주거나
+
+```bash
+dotnet run - <<'EOF'
+#:package Naratteu.Anonymous@0.0.1
+
+var log = new List<string>();
+
+IConfig config = IConfig.New(new()
+{
+    Name = "beambeam",                     // 값 그대로 넣으면 그게 게터
+    Level = 1,                             // 읽고쓰기: 자동 저장소가 붙는다
+    Trace = new()                          // 읽고쓰기: 접근자를 직접
+    {
+        get = () => log.Count > 0,
+        set = v => log.Add($"Trace={v}"),
+    },
+});
+
+config.Level++;
+config.Trace = true;
+Console.WriteLine($"{config.Name} / Level={config.Level} / Trace={config.Trace} / [{string.Join(",", log)}]");
+
+interface IConfig
+{
+    string Name { get; }
+    int Level { get; set; }
+    bool Trace { get; set; }
+}
+EOF
+```
+
+```
+beambeam / Level=2 / Trace=True / [Trace=True]
+```
+
+### 남이 만든 인터페이스도, 제네릭 형태도
+
+```bash
+dotnet run - <<'EOF'
+#:package Naratteu.Anonymous@0.0.1
+
+using (IDisposable d = IDisposable.New(new() { Dispose = () => Console.WriteLine("정리됨") }))
+    Console.WriteLine("using 블록 안");
+
+IComparer<int> desc = IComparer<int>.New(new() { Compare = (a, b) => b.CompareTo(a) });
+List<int> xs = [3, 1, 2];
+xs.Sort(desc);
+Console.WriteLine($"내림차순: {string.Join(",", xs)}");
+
+IGreeter g = Anon.New<IGreeter>(new() { Greet = n => $"hi {n}" });
+Console.WriteLine(g.Greet("world"));
+
+interface IGreeter { string Greet(string name); }
+EOF
+```
+
+```
+using 블록 안
+정리됨
+내림차순: 3,2,1
+hi world
+```
 
 ## 어떻게 도는가
 
@@ -82,7 +164,7 @@ IGreeter b = Anon.New<IGreeter>(new() { .. });  // 제네릭 형태 — C# 11 �
 
 ```xml
 <PropertyGroup>
-  <AnonymousEntryName>New</AnonymousEntryName>   <!-- IGreeter.New(..)   -->
+  <AnonymousEntryName>New</AnonymousEntryName>    <!-- IGreeter.New(..)       -->
   <AnonymousHolderName>Anon</AnonymousHolderName> <!-- Anon.New<IGreeter>(..) -->
 </PropertyGroup>
 ```
@@ -101,6 +183,10 @@ IGreeter b = Anon.New<IGreeter>(new() { .. });  // 제네릭 형태 — C# 11 �
 | `ANON002` | 제네릭 메서드는 대리자로 못 옮긴다. 호출하면 `NotSupportedException` |
 | `ANON003` | 제네릭 형태 호출이 상속관계 때문에 모호하다. 확장 형태로 부르면 된다 |
 | `ANON004` | `static abstract` · 연산자 · 비공개 멤버가 있어 익명구현 자체가 불가능 |
+
+## 라이센스
+
+[VibeCoded AI-Slop License v1.0](LICENSE)
 
 ## 선행작업
 

@@ -9,6 +9,13 @@
     <IsRoslynComponent>true</IsRoslynComponent>
 
     <PackageId>Naratteu.Anonymous</PackageId>
+    <Version>0.0.1</Version>
+    <Authors>naratteu</Authors>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/naratteu/Naratteu.Anonymous</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/naratteu/Naratteu.Anonymous</RepositoryUrl>
+    <PackageTags>sourcegenerator;roslyn;anonymous-class;interface</PackageTags>
     <Description>인터페이스를 자바 익명클래스처럼 그 자리에서 구현하게 해주는 소스제너레이터</Description>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <DevelopmentDependency>true</DevelopmentDependency>
@@ -23,6 +30,8 @@
   <ItemGroup>
     <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
     <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="" />
+    <None Include="..\README.md" Pack="true" PackagePath="" />
     <None Include="build\Naratteu.Anonymous.props" Pack="true" PackagePath="build" />
     <None Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
