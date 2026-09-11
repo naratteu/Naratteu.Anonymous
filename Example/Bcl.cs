@@ -15,6 +15,15 @@ static class Bcl
         xs.Sort(desc);
         Console.WriteLine($"내림차순: {string.Join(",", xs)}");
 
+        // Equals / GetHashCode 처럼 object 의 멤버와 이름이 겹쳐도 조용히 넘어간다
+        var dict = new Dictionary<string, int>(IEqualityComparer<string>.New(new()
+        {
+            Equals = (a, b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase),
+            GetHashCode = s => s.ToLowerInvariant().GetHashCode(),
+        }));
+        dict["Hello"] = 1;
+        Console.WriteLine($"대소문자 무시: dict[\"HELLO\"] = {dict["HELLO"]}");
+
         // 같은 이름이 여러 인터페이스에서 올라오면 선언한 인터페이스 이름으로 갈라준다
         IEnumerable<int> seq = IEnumerable<int>.New(new()
         {

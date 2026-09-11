@@ -76,6 +76,9 @@ static class Emitter
         }
     }
 
+    /// <summary>object 의 멤버를 가리는 이름이면 new 를 붙여줘야 CS0108 이 안 샌다. (IEqualityComparer 의 Equals 같은 것)</summary>
+    static bool Hides(string name) => name is "Equals" or "GetHashCode" or "ToString" or "GetType" or "MemberwiseClone" or "Finalize";
+
     static HashSet<string> Covered(AnonTarget t) => [t.DefKey, .. t.Bases.Select(b => b.DefKey)];
 
     static SourceText Source(string text) => SourceText.From(text, Encoding.UTF8);
@@ -87,7 +90,7 @@ static class Emitter
             .. members.Select(m => m.ExplicitImpl).Where(i => i is not ""),
         ];
         var props = members.Where(m => m.TypeRef is not null)
-            .Select(m => $"public {(m.Required ? "required " : "")}{m.TypeRef} {m.Name} {{ get; init; }}{(m.Initializer is null ? "" : $" = {m.Initializer};")}")
+            .Select(m => $"public {(Hides(m.Name) ? "new " : "")}{(m.Required ? "required " : "")}{m.TypeRef} {m.Name} {{ get; init; }}{(m.Initializer is null ? "" : $" = {m.Initializer};")}")
             .ToList();
         if (body.Count > 0 && props.Count > 0) body.Add("");
         body.AddRange(props);
