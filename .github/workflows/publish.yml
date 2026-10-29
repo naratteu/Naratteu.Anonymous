@@ -7,7 +7,9 @@
 #     Repository Owner : naratteu
 #     Repository       : Naratteu.Anonymous
 #     Workflow File    : publish.yml   (경로 없이 파일명만)
-#   그리고 저장소 secrets 에 NUGET_USER = nuget.org 사용자명(이메일 아님)
+#
+# user 는 nuget.org 사용자명(이메일 아님)이고 비밀이 아니다. 패키지 소유자로
+# 공개되어 있으니 그냥 박아두고, 바꿀 일이 생기면 secrets.NUGET_USER 로 덮는다.
 name: publish
 
 on:
@@ -46,7 +48,7 @@ jobs:
         uses: NuGet/login@v1
         id: login
         with:
-          user: ${{ secrets.NUGET_USER }}
+          user: ${{ secrets.NUGET_USER || 'Naratteu' }}
 
       - name: push
         run: dotnet nuget push artifacts/*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json

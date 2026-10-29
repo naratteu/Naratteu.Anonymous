@@ -15,7 +15,7 @@ C# 에는 자바의 익명클래스가 없다. ([왜 없는지](https://chatgpt.
 
 ```bash
 dotnet run - <<'EOF'
-#:package Naratteu.Anonymous@0.0.1
+#:package Naratteu.Anonymous@0.1.0
 
 IGreeter greeter = IGreeter.New(new()
 {
@@ -43,7 +43,7 @@ EOF
 
 ```bash
 dotnet run - <<'EOF'
-#:package Naratteu.Anonymous@0.0.1
+#:package Naratteu.Anonymous@0.1.0
 
 var log = new List<string>();
 
@@ -79,7 +79,7 @@ beambeam / Level=2 / Trace=True / [Trace=True]
 
 ```bash
 dotnet run - <<'EOF'
-#:package Naratteu.Anonymous@0.0.1
+#:package Naratteu.Anonymous@0.1.0
 
 using (IDisposable d = IDisposable.New(new() { Dispose = () => Console.WriteLine("정리됨") }))
     Console.WriteLine("using 블록 안");
