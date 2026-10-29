@@ -9,7 +9,7 @@
     <IsRoslynComponent>true</IsRoslynComponent>
 
     <PackageId>Naratteu.Anonymous</PackageId>
-    <Version>0.0.1</Version>
+    <Version>0.1.0</Version>
     <Authors>naratteu</Authors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
